@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>勇哥练字书画院 · 最美语文书评选活动</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f7f2e8;color:#2b2118;font-family:"Microsoft YaHei",Arial,sans-serif}
+.header{background:#8a4b1e;color:#fff;text-align:center;padding:24px 12px;border-radius:0 0 24px 24px}
+.header h1{margin:0;font-size:28px}.header p{margin:10px 0 0}
+.container{max-width:1100px;margin:auto;padding:16px}
+.nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:16px 0}
+.nav button,.btn{border:0;border-radius:12px;padding:12px;background:#8a4b1e;color:white;font-size:16px;cursor:pointer}
+.nav button{background:#fff;color:#5a3517;border:1px solid #dec19a}.nav button.active{background:#8a4b1e;color:#fff}
+.card{background:#fff;border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 8px 24px rgba(80,45,10,.08)}
+h2{margin-top:0;color:#5a3517}.rule{line-height:1.9;color:#5c4a3b}
+label{display:block;margin:12px 0 6px;font-weight:bold}
+input,select{width:100%;padding:12px;border:1px solid #d8c4a9;border-radius:10px;font-size:16px}
+.notice{background:#fff0d1;border:1px solid #e0bd7e;border-radius:14px;padding:12px;margin:12px 0;color:#6a431b}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.work{border:1px solid #eadcc7;border-radius:16px;padding:12px;background:#fffdfa}
+.workTop{display:flex;justify-content:space-between;color:#8a4b1e;font-weight:bold}
+.work h3{margin:8px 0 4px}.work p{margin:4px 0;color:#6d5743;font-size:14px}
+.images{display:grid;gap:8px;margin:10px 0}.images img{width:100%;border-radius:12px;border:1px solid #eadcc7}
+.voteBtn{width:100%;border:1px solid #d8b98e;background:white;color:#5a3517;border-radius:999px;padding:10px}
+.voteBtn.selected{background:#e6b85e;color:#3c230c}.voteBtn:disabled{opacity:.5}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.row>*{flex:1}
+.tableWrap{overflow-x:auto}table{width:100%;border-collapse:collapse;background:white}
+th,td{border-bottom:1px solid #eadcc7;padding:10px;text-align:left;white-space:nowrap}th{background:#fff3dc}
+.hidden{display:none}.small{font-size:13px;color:#80604a}
+@media(max-width:700px){.header h1{font-size:23px}.nav{grid-template-columns:repeat(2,1fr)}.container{padding:10px}.card{padding:14px}}
+</style>
+</head>
+<body>
+<div class="header"><h1>勇哥练字书画院 · 最美语文书评选活动</h1><p>卷面不丢分 · 作业快一倍</p></div>
+<div class="container">
+<div class="nav">
+<button id="navHome" class="active" onclick="showPage('home')">首页</button>
+<button id="navUpload" onclick="showPage('upload')">上传作品</button>
+<button id="navGallery" onclick="showPage('gallery')">作品投票</button>
+<button id="navAdmin" onclick="showPage('admin')">后台统计</button>
+</div>
+
+<section id="home" class="page">
+<div class="card"><h2>活动介绍</h2><div class="rule">一页整洁的语文书，藏着孩子的认真、习惯和进步。本次“最美语文书评选活动”邀请孩子上传自己最满意的语文书、作文页或课堂笔记，展示书写成果，也让更多人看见孩子的努力。</div></div>
+<div class="card"><h2>活动规则</h2><div class="rule">① 每位学生可上传1-4张作品照片。<br>② 作品内容可选择生字页、作文页、课堂笔记页等。<br>③ 作品要求页面完整、字迹清晰、卷面整洁。<br>④ 作品上传后将公开展示。<br>⑤ 每台设备共有3票，需投给3个不同作品。<br>⑥ 投票结果公开展示，欢迎转发分享，为喜欢的作品助力。<br>⑦ 优秀作品将有机会参与线下展示，并获得荣誉证书及奖品。</div></div>
+<button class="btn" onclick="showPage('upload')">立即上传作品</button>
+</section>
+
+<section id="upload" class="page hidden">
+<div class="card"><h2>上传作品</h2><div class="notice">请上传清晰图片，最多4张。提交后作品会直接展示。</div>
+<form id="uploadForm">
+<label>学生姓名</label><input id="student_name" required placeholder="请输入学生姓名">
+<label>年级</label><select id="grade"><option>幼儿园中班</option><option>幼儿园大班</option><option>一年级</option><option>二年级</option><option>三年级</option><option>四年级</option><option>五年级</option><option>六年级</option></select>
+<label>学校班级</label><input id="class_name" required placeholder="例如：一（2）班 / 二（1）班">
+<label>所在学校</label><input id="school" required placeholder="请输入学校名称">
+<label>上传作品图片，1-4张</label><input id="image_files" type="file" accept="image/*" multiple required>
+<button class="btn" type="submit" id="submitBtn">提交作品</button>
+</form></div>
+</section>
+
+<section id="gallery" class="page hidden">
+<div class="card"><h2>作品展示与投票</h2><div class="row"><select id="gradeFilter" onchange="renderWorks()"><option>全部</option><option>幼儿园中班</option><option>幼儿园大班</option><option>一年级</option><option>二年级</option><option>三年级</option><option>四年级</option><option>五年级</option><option>六年级</option></select><button class="btn" onclick="loadWorks()">刷新作品</button></div><div id="voteNotice" class="notice"></div><button class="btn" id="voteSubmitBtn" onclick="submitVote()">提交投票</button></div>
+<div id="worksGrid" class="grid"></div>
+</section>
+
+<section id="admin" class="page hidden">
+<div class="card"><h2>后台统计</h2><p class="small">当前是简易后台，正式使用前可以再加密码。</p><button class="btn" onclick="exportCSV()">导出统计表</button></div>
+<div class="card tableWrap"><table><thead><tr><th>编号</th><th>姓名</th><th>年级</th><th>学校班级</th><th>学校</th><th>票数</th><th>图片链接</th></tr></thead><tbody id="adminRows"></tbody></table></div>
+</section>
+</div>
+
+<script>
+const SUPABASE_URL = "https://tiulllymkgpkrchjhhvh.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRpdWxsbHlta2dwa3JjaGpoaHZoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA5ODk2MDAsImV4cCI6MjA5NjU2NTYwMH0.VzrOPoW_Aor6mzSh4qM2psWzCD8H4VcHKTfauF6ctiI";
+const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const pages=["home","upload","gallery","admin"];
+let allWorks=[];let selectedVotes=[];
+function showPage(page){pages.forEach(p=>{document.getElementById(p).classList.toggle("hidden",p!==page);document.getElementById("nav"+p[0].toUpperCase()+p.slice(1)).classList.toggle("active",p===page)});if(page==="gallery"||page==="admin")loadWorks()}
+function getVoterId(){let id=localStorage.getItem("yongge_voter_id");if(!id){id=crypto.randomUUID();localStorage.setItem("yongge_voter_id",id)}return id}
+function gradeShort(g){return g.replace("幼儿园","")}
+function parseImages(t){try{return JSON.parse(t||"[]")}catch(e){return[]}}
+function worksWithNumbers(){const count={};return allWorks.map(w=>{count[w.grade]=(count[w.grade]||0)+1;return{...w,displayNo:gradeShort(w.grade)+String(count[w.grade]).padStart(3,"0")}})}
+async function loadWorks(){const grid=document.getElementById("worksGrid");if(grid)grid.innerHTML="<div class='card'>加载中...</div>";const{data,error}=await client.from("works").select("*").order("grade").order("created_at");if(error){if(grid)grid.innerHTML="<div class='card'>读取失败："+error.message+"</div>";return}allWorks=data||[];renderWorks();renderAdmin()}
+function renderWorks(){const grid=document.getElementById("worksGrid");if(!grid)return;const filter=document.getElementById("gradeFilter").value;const works=worksWithNumbers().filter(w=>filter==="全部"||w.grade===filter);const hasVoted=localStorage.getItem("yongge_has_voted")==="yes";document.getElementById("voteNotice").innerText=hasVoted?"这台设备已经投过票，谢谢支持！":`已选择 ${selectedVotes.length}/3 个作品，请选择3个不同作品后提交。`;document.getElementById("voteSubmitBtn").disabled=hasVoted;if(!works.length){grid.innerHTML="<div class='card'>暂时还没有作品。</div>";return}grid.innerHTML=works.map(w=>{const imgs=parseImages(w.image_urls).map(url=>`<img src="${url}">`).join("");const selected=selectedVotes.includes(String(w.id));return `<div class="work"><div class="workTop"><span>${w.displayNo}</span><span>${w.votes||0}票</span></div><h3>${w.student_name||""}</h3><p>${w.grade||""}｜${w.class_name||""}</p><p>${w.school||""}</p><div class="images">${imgs}</div><button class="voteBtn ${selected?"selected":""}" ${hasVoted?"disabled":""} onclick="toggleVote('${w.id}')">${selected?"已选择":"投TA一票"}</button></div>`}).join("")}
+function toggleVote(id){if(localStorage.getItem("yongge_has_voted")==="yes"){alert("这台设备已经投过票啦。");return}if(selectedVotes.includes(id)){selectedVotes=selectedVotes.filter(x=>x!==id)}else{if(selectedVotes.length>=3){alert("每台设备最多投3票，并且必须投给3个不同作品。");return}selectedVotes.push(id)}renderWorks()}
+async function submitVote(){if(localStorage.getItem("yongge_has_voted")==="yes"){alert("这台设备已经投过票啦。");return}if(selectedVotes.length!==3){alert("请选满3个不同作品后再提交。");return}const voterId=getVoterId();const{error:voteError}=await client.from("votes").insert({voter_id:voterId,work_ids:JSON.stringify(selectedVotes)});if(voteError){alert("投票失败："+voteError.message);return}for(const id of selectedVotes){const work=allWorks.find(w=>String(w.id)===String(id));await client.from("works").update({votes:(work?.votes||0)+1}).eq("id",id)}localStorage.setItem("yongge_has_voted","yes");selectedVotes=[];alert("投票成功，谢谢支持！");loadWorks()}
+document.getElementById("uploadForm").addEventListener("submit",async function(e){e.preventDefault();const files=Array.from(document.getElementById("image_files").files||[]);if(files.length<1||files.length>4){alert("请上传1-4张作品图片。");return}const btn=document.getElementById("submitBtn");btn.disabled=true;btn.innerText="提交中...";const urls=[];for(const file of files){if(!file.type.startsWith("image/")){alert("只能上传图片。");btn.disabled=false;btn.innerText="提交作品";return}const ext=file.name.split(".").pop();const path=`${Date.now()}-${Math.random().toString(16).slice(2)}.${ext}`;const{error:uploadError}=await client.storage.from("works").upload(path,file);if(uploadError){alert("图片上传失败："+uploadError.message);btn.disabled=false;btn.innerText="提交作品";return}const{data}=client.storage.from("works").getPublicUrl(path);urls.push(data.publicUrl)}const{error}=await client.from("works").insert({student_name:document.getElementById("student_name").value.trim(),grade:document.getElementById("grade").value,class_name:document.getElementById("class_name").value.trim(),school:document.getElementById("school").value.trim(),image_urls:JSON.stringify(urls),votes:0});if(error){alert("提交失败："+error.message)}else{alert("提交成功！作品已公开展示。");this.reset();showPage("gallery")}btn.disabled=false;btn.innerText="提交作品"})
+function renderAdmin(){const tbody=document.getElementById("adminRows");if(!tbody)return;const rows=worksWithNumbers().sort((a,b)=>(b.votes||0)-(a.votes||0));tbody.innerHTML=rows.map(w=>`<tr><td>${w.displayNo}</td><td>${w.student_name||""}</td><td>${w.grade||""}</td><td>${w.class_name||""}</td><td>${w.school||""}</td><td>${w.votes||0}</td><td>${parseImages(w.image_urls).join(" | ")}</td></tr>`).join("")}
+function exportCSV(){const rows=worksWithNumbers().sort((a,b)=>(b.votes||0)-(a.votes||0));const header=["编号","姓名","年级","学校班级","学校","票数","图片链接"];const body=rows.map(w=>[w.displayNo,w.student_name,w.grade,w.class_name,w.school,w.votes||0,parseImages(w.image_urls).join(" | ")]);const csv=[header,...body].map(row=>row.map(x=>`"${String(x).replaceAll('"','""')}"`).join(",")).join("\\n");const blob=new Blob(["\\ufeff"+csv],{type:"text/csv;charset=utf-8"});const url=URL.createObjectURL(blob);const a=document.createElement("a");a.href=url;a.download="最美语文书作品统计.csv";a.click();URL.revokeObjectURL(url)}
+loadWorks();
+</script>
+</body>
+</html>
