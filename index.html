@@ -90,8 +90,41 @@ const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const pages=["home","upload","gallery","admin"];
 let allWorks=[];let selectedVotes=[];
-function showPage(page){pages.forEach(p=>{document.getElementById(p).classList.toggle("hidden",p!==page);document.getElementById("nav"+p[0].toUpperCase()+p.slice(1)).classList.toggle("active",p===page)});if(page==="gallery"||page==="admin")loadWorks()}
-function getVoterId(){let id=localStorage.getItem("yongge_voter_id");if(!id){id=crypto.randomUUID();localStorage.setItem("yongge_voter_id",id)}return id}
+function showPage(page){
+
+if(page==="admin"){
+
+const isAuth=localStorage.getItem("admin_auth");
+
+if(isAuth!=="yes"){
+
+const pwd=prompt("请输入老师查看密码");
+
+if(pwd!=="hxy20120222"){
+alert("密码错误");
+return;
+}
+
+localStorage.setItem("admin_auth","yes");
+
+setTimeout(()=>{
+localStorage.removeItem("admin_auth");
+},30*60*1000);
+
+}
+
+}
+
+pages.forEach(p=>{
+document.getElementById(p).classList.toggle("hidden",p!==page);
+document.getElementById("nav"+p[0].toUpperCase()+p.slice(1)).classList.toggle("active",p===page);
+});
+
+if(page==="gallery"||page==="admin"){
+loadWorks();
+}
+
+}function getVoterId(){let id=localStorage.getItem("yongge_voter_id");if(!id){id=crypto.randomUUID();localStorage.setItem("yongge_voter_id",id)}return id}
 function gradeShort(g){return g.replace("幼儿园","")}
 function parseImages(t){try{return JSON.parse(t||"[]")}catch(e){return[]}}
 function worksWithNumbers(){const count={};return allWorks.map(w=>{count[w.grade]=(count[w.grade]||0)+1;return{...w,displayNo:gradeShort(w.grade)+String(count[w.grade]).padStart(3,"0")}})}
